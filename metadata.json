@@ -1,0 +1,6 @@
+{
+  "name": "Shri Gnanambica Degree College - Digital Campus Portal",
+  "description": "Upgraded official Digital Campus Platform for Shri Gnanambica Degree College (Autonomous), Madanapalle. Featuring Student, Faculty, Parent, and Admin Portals, Admissions, Attendance, Results, Fees, Timetable, AI Assistant, and PWA.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

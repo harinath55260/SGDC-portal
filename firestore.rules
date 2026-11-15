@@ -1,0 +1,235 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        getUserData().role == 'admin' ||
+        request.auth.token.role == 'admin' ||
+        request.auth.token.email == 'admin@sgnanambica.edu.in'
+      );
+    }
+
+    function isFaculty() {
+      return isAuthenticated() && (
+        getUserData().role == 'faculty' ||
+        request.auth.token.role == 'faculty'
+      );
+    }
+
+    function isStudent() {
+      return isAuthenticated() && (
+        getUserData().role == 'student' ||
+        request.auth.token.role == 'student'
+      );
+    }
+
+    function isParent() {
+      return isAuthenticated() && (
+        getUserData().role == 'parent' ||
+        request.auth.token.role == 'parent'
+      );
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Public collections (read-only for guests, admin write)
+    match /departments/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /courses/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /subjects/{id} {
+      allow read: if true;
+      allow write: if isAdmin() || isFaculty();
+    }
+
+    match /notices/{id} {
+      allow read: if true;
+      allow write: if isAdmin() || isFaculty();
+    }
+
+    match /events/{id} {
+      allow read: if true;
+      allow write: if isAdmin() || isFaculty();
+    }
+
+    match /gallery/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /placements/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /ai_faqs/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // User profiles & auth info
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow create, update: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    match /students/{studentId} {
+      allow read: if isAuthenticated() && (
+        isOwner(studentId) || 
+        isAdmin() || 
+        isFaculty() || 
+        (isParent() && getUserData().studentId == studentId)
+      );
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /faculty/{facultyId} {
+      allow read: if true; // directory view
+      allow write: if isAdmin();
+    }
+
+    match /parents/{parentId} {
+      allow read: if isAuthenticated() && (isOwner(parentId) || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // Attendance
+    match /attendance/{id} {
+      allow read: if isAuthenticated() && (
+        isAdmin() || 
+        isFaculty() || 
+        (isStudent() && resource.data.studentId == request.auth.uid) ||
+        (isParent() && resource.data.studentId == getUserData().studentId)
+      );
+      allow create, update: if isAdmin() || isFaculty();
+      allow delete: if isAdmin();
+    }
+
+    // Marks & Results
+    match /marks/{id} {
+      allow read: if isAuthenticated() && (
+        isAdmin() || 
+        isFaculty() || 
+        (isStudent() && resource.data.studentId == request.auth.uid) ||
+        (isParent() && resource.data.studentId == getUserData().studentId)
+      );
+      allow create, update: if isAdmin() || isFaculty();
+      allow delete: if isAdmin();
+    }
+
+    match /results/{id} {
+      allow read: if isAuthenticated() && (
+        isAdmin() || 
+        isFaculty() || 
+        (isStudent() && resource.data.studentId == request.auth.uid) ||
+        (isParent() && resource.data.studentId == getUserData().studentId)
+      );
+      allow write: if isAdmin() || isFaculty();
+    }
+
+    // Fees & Payments
+    match /fees/{id} {
+      allow read: if isAuthenticated() && (
+        isAdmin() || 
+        (isStudent() && resource.data.studentId == request.auth.uid) ||
+        (isParent() && resource.data.studentId == getUserData().studentId)
+      );
+      allow write: if isAdmin();
+    }
+
+    match /payments/{id} {
+      allow read: if isAuthenticated() && (
+        isAdmin() || 
+        (isStudent() && resource.data.studentId == request.auth.uid) ||
+        (isParent() && resource.data.studentId == getUserData().studentId)
+      );
+      allow create: if isAuthenticated() && (
+        (isStudent() && request.resource.data.studentId == request.auth.uid) ||
+        (isParent() && request.resource.data.studentId == getUserData().studentId) ||
+        isAdmin()
+      );
+      allow update, delete: if isAdmin();
+    }
+
+    // Timetables
+    match /timetables/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() || isFaculty();
+    }
+
+    // Assignments
+    match /assignments/{id} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin() || isFaculty();
+    }
+
+    // Submissions
+    match /submissions/{id} {
+      allow read: if isAuthenticated() && (
+        isAdmin() || 
+        isFaculty() || 
+        (isStudent() && resource.data.studentId == request.auth.uid)
+      );
+      allow create: if isAuthenticated() && isStudent();
+      allow update: if isAuthenticated() && (
+        (isStudent() && resource.data.studentId == request.auth.uid) || 
+        isFaculty() || 
+        isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Study Materials
+    match /materials/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() || isFaculty();
+    }
+
+    // Placement Applications
+    match /applications/{id} {
+      allow read: if isAuthenticated() && (
+        isAdmin() || 
+        (isStudent() && resource.data.studentId == request.auth.uid)
+      );
+      allow create: if isAuthenticated() && isStudent();
+      allow update, delete: if isAdmin();
+    }
+
+    // Notifications
+    match /notifications/{id} {
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid || 
+        resource.data.targetRole == getUserData().role || 
+        resource.data.targetRole == 'all'
+      );
+      allow create: if isAdmin() || isFaculty();
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid; // mark as read
+      allow delete: if isAdmin();
+    }
+
+    // Admission applications from public
+    match /admissions/{id} {
+      allow create: if true; // Prospective students can register online
+      allow read, update, delete: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "id": "/",
+  "name": "Shri Gnanambica Degree College",
+  "short_name": "SGDC Portal",
+  "description": "Official Digital Campus & Management Portal for Shri Gnanambica Degree College (Autonomous), Madanapalle",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#1e3a8a",
+  "categories": ["education", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/college1-logo.png",
+      "sizes": "147x233",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Student Login",
+      "short_name": "Login",
+      "description": "Log into Student or Faculty Portal",
+      "url": "/#login",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Academics & Syllabi",
+      "short_name": "Academics",
+      "description": "View Courses and Autonomous Regulations",
+      "url": "/#academics",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Admissions Form",
+      "short_name": "Admissions",
+      "description": "Apply online for Degree Courses",
+      "url": "/#admissions",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
